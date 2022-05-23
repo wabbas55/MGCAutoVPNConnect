@@ -38,7 +38,8 @@ def connect_to_vpn(username, password, PIN, cisco_path, passcode_path):
 
     app = application.Application(backend="uia")
     
-    # Check if cisco appication is already running and kill it for now if so
+    # Check if cisco appication is already running and kill it for now if so.
+    # This is to avoid a long wait time for app.start() API when this app is already running
     # Note: If not running, app.connect() will raise exception
     try:
         app.connect(path=cisco_path)
