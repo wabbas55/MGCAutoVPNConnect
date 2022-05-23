@@ -5,11 +5,13 @@ from tkinter.messagebox import showerror
 import tkinter as tk
 from tkinter import *
 import os
+import sys
 import threading
 import pickle
 
 main_app = 0
 main_window = 0
+root = 0
 global_username = ""
 global_password = ""
 global_pin = ""
@@ -131,6 +133,11 @@ def eventhandler(evt):
         
 def enter_key_handler(evt):
     main_window.connect_btn.invoke()
+        
+def kill_root():
+    global root
+    #root.destroy()
+    sys.exit(0)
  
 def main():
 
@@ -242,6 +249,9 @@ def main():
             self.bind("<<error_event>>", eventhandler)
             self.bind('<Return>', enter_key_handler)
             
+            # Set close callback
+            self.protocol("WM_DELETE_WINDOW", kill_root)
+            
             
         def connect_vpn(self, username, password, pin, cisco_path, passcode_path, check_var): #username_entry, password_entry, pin_entry):
             
@@ -328,7 +338,7 @@ def main():
             
             #self.status_label.config(text= "Connected successfully!")
             #self.labelText.set("Connected successfully!")
-
+        
     main_app = MainApp()
     main_app.mainloop()
     
