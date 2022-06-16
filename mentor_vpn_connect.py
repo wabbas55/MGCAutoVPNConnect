@@ -17,8 +17,19 @@ global_password = ""
 global_pin = ""
 global_cisco_path = ""
 global_passcode_path = ""
+retrieved_passcode = 0
 
 Error_Printing = False
+
+class Passcode_Thread (threading.Thread):
+    def __init__(self, threadID, name):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+    def run(self):
+        global retrieved_passcode
+        
+        retrieved_passcode = get_passcode(global_pin)
 
 class Connection_Thread (threading.Thread):
     def __init__(self, threadID, name):
@@ -37,6 +48,8 @@ class Connection_Thread (threading.Thread):
         
 
 def connect_to_vpn(username, password, PIN, cisco_path, passcode_path):
+
+    global retrieved_passcode
 
     app = application.Application(backend="uia")
     
@@ -106,13 +119,14 @@ def connect_to_vpn(username, password, PIN, cisco_path, passcode_path):
     # Wait for OTP window to appear
     while not wnd.window(title_re='Cisco AnyConnect | * - 2FA').exists():
         time.sleep(.5)
-
-    # Get passcode (OTP) from passcode app
-    passcode = get_passcode(PIN)
+    
+    # Wait for passcode retrievel by PasscodeThread from Passcode App
+    while (retrieved_passcode == 0):
+        pass
 
     # Enter OTP and click continue to same window
     otp_field = uname_pwd_win.window(title="Answer:", control_type="Edit")
-    otp_field.set_text(passcode)
+    otp_field.set_text(retrieved_passcode)
     uname_pwd_win.Continue.click()
 
     # Wait for Accept dialog window to appear
@@ -327,12 +341,19 @@ def main():
             global_cisco_path = cisco_path
             global_passcode_path = passcode_path
             
-            # Create new thread
-            vpnConnectThread = Connection_Thread(1, "ConnectionThread")
+            # Create new thread for Cisco AnyConnect App
+            vpnConnectThread = Connection_Thread(1, "CiscoAnyConnectThread")
 
             # Start new thread as a deamon
             vpnConnectThread.setDaemon(True)
             vpnConnectThread.start()
+            
+            # Create new thread for Passcode App
+            passcodeAppThread = Passcode_Thread(2, "PasscodeThread")
+
+            # Start new thread as a deamon
+            passcodeAppThread.setDaemon(True)
+            passcodeAppThread.start()
             
             #connect_to_vpn(username, password, pin, cisco_path, passcode_path)
             

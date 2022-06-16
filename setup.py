@@ -47,7 +47,7 @@ bdist_msi_options = {'data': msi_data}
 cx_Freeze.setup(
     name = "MGC VPN Connect",
     options = {"build_exe": {"packages":["tkinter"], "include_files":["icon2.png", "credentials.txt"]}, "bdist_msi": bdist_msi_options},
-    version = "0.9",
+    version = "1.0",
     description = "An app to connect to Mentor VPN automatically.",
     executables = executables
     )
